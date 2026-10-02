@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: fake-idp
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      # Set to the service's public URL after the first deploy, then redeploy.
+      - key: FAKE_IDP_ISSUER
+        sync: false
