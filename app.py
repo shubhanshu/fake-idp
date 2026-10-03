@@ -130,6 +130,17 @@ def authorize_callback():
     redirect_url = f"{redirect_uri}?{urlencode(params)}"
     return redirect(redirect_url)
 
+def _client_id_from_basic_auth():
+    """Extract client_id from an HTTP Basic Authorization header, if present."""
+    header = request.headers.get('Authorization', '')
+    if header.startswith('Basic '):
+        try:
+            decoded = base64.b64decode(header[len('Basic '):]).decode('utf-8')
+            return decoded.split(':', 1)[0]
+        except Exception:
+            return None
+    return None
+
 # Token endpoint
 @app.route('/token', methods=['POST'])
 def token():
@@ -138,7 +149,7 @@ def token():
     
     if grant_type == 'authorization_code':
         code = request.form.get('code')
-        client_id = request.form.get('client_id')
+        client_id = request.form.get('client_id') or _client_id_from_basic_auth()
         redirect_uri = request.form.get('redirect_uri')
         
         # Validate authorization code
